@@ -72,7 +72,7 @@ class Util:
           mime -- mime-type
 
         Returns:
-            HTTPresponse
+            HTTP statuscode, response as text
         """
         logging.debug('Sending request with method: {0} to path: {1}:{2}/{3}/{4}'.format(
                             method,
@@ -107,7 +107,7 @@ class Util:
             raise e
         finally:
             connection.close()
-        return resp
+        return response.status, resp
 
 def main():
     u = Util('settings.cfg')
