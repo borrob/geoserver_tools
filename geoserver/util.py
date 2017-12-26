@@ -21,7 +21,7 @@ class Util:
         try:
             self.config.readfp(open(config_file))
         except IOError:
-            print ('Could not read specified configfile -> using default values')
+            print ('Could not read specified configfile -> using defaults')
             self.config.add_section('server')
             self.config.set('server', 'url', 'localhost')
             self.config.set('server', 'port', '8080')
@@ -36,7 +36,8 @@ class Util:
                     and self.config.has_option('server', 'url')
                     and self.config.has_option('server','port')
                     and self.config.has_option('server','address'))):
-                print 'Config file is not complete! I need url, port and address in the server section!'
+                print 'Config file is not complete! I need url, ' + \
+                      'port and address in the server section!'
                 raise ValueError('Config file is not complete.')
             if (not(self.config.has_section('logging')
                     and self.config.has_option('logging', 'filename')
@@ -47,8 +48,11 @@ class Util:
         self._url = self.config.get('server','url')
         self._port = self.config.get('server', 'port')
         self._address = self.config.get('server', 'address')
+        self._user_and_pass = b64encode(self.config.get('server','user') + ':'+\
+                                        self.config.get('server','pass'))
 
-        logging.basicConfig(filename=self.config.get('logging','filename'), level=self.config.get('logging','level'))
+        logging.basicConfig(filename=self.config.get('logging','filename'), \
+                            level=self.config.get('logging','level'))
         logging.info('Initialised Util class with settings')
 
     def request(self, method, path, payload, mime='text/xml'):
@@ -63,24 +67,26 @@ class Util:
         Returns:
             HTTPresponse
         """
-        logging.debug('Sending request with method: {0}, to path: {1}'.format(method, path))
-        userAndPass = b64encode(self.config.get('server','user') + ':' + self.config.get('server','pass'))
-        headers = {'Authorization' : 'Basic {0}'.format(userAndPass),
+        logging.debug('Sending request with method: {0}, to path: {1}'.format(
+                            method,
+                            path))
+        headers = {'Authorization' : 'Basic {0}'.format(self._user_and_pass),
                    'Content-type': mime}
         try:
             connection = httplib.HTTPConnection(
-                    self.config.get('server', 'url'),
-                    self.config.get('server', 'port'))
+                    self._url,
+                    self._port)
             connection.request(
                     method,
-                    self.config.get('server', 'address') + '/' + path,
+                    self._address + '/' + path,
                     payload,
                     headers)
         except Exception as e:
-            logging.error('Error with sending "{0}"-request to {1}:{2}/{3}/{4}. Get error: {5}'.format(method,
-                                                        self.config.get('server','url'),
-                                                        self.config.get('server','port'),
-                                                        self.config.get('server', 'address'),
+            logging.error('Error with sending "{0}"-request to ' + \
+                          '{1}:{2}/{3}/{4}. Get error: {5}'.format(method,
+                                                        self._url,
+                                                        self._port,
+                                                        self._address,
                                                         path,
                                                         e))
             raise e
