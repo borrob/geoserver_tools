@@ -20,7 +20,7 @@ import logging
 
 from util import Util
 
-def get_workspaces(u=Util()):
+def get_workspaces(u):
     """Get an overview of all workspaces.
 
     Uses the util class to get the specifices on the server etc.
@@ -39,7 +39,7 @@ def get_workspaces(u=Util()):
         out[w.get('name')] = {'href': w.get('href')}
     return out
 
-def workspace_exists(workspacename, u=Util()):
+def workspace_exists(workspacename, u):
     """Check if workspace alreade exists in this geoserver configuration.
 
     Returns True of False.
@@ -51,7 +51,7 @@ def workspace_exists(workspacename, u=Util()):
                                  mime = 'application/json')
     return stat == 200
 
-def get_workspace_info(workspacename, u=Util()):
+def get_workspace_info(workspacename, u):
     """Get information on the workspaces
 
     Returns a dict with the workspace info.
@@ -69,7 +69,7 @@ def get_workspace_info(workspacename, u=Util()):
     ws_info = json.loads(ws_request).get('workspace')
     return ws_info
 
-def create_workspace(workspacename, u=Util()):
+def create_workspace(workspacename, u):
     """Create a new workspace
 
     Does not check if the workspace already exists.
@@ -90,7 +90,7 @@ def create_workspace(workspacename, u=Util()):
 
     return stat == 201
 
-def make_workspace_default(workspacename, u=Util()):
+def make_workspace_default(workspacename, u):
     """Make the workspace the default option.
 
     Return True or False if succesful.
@@ -113,7 +113,7 @@ def make_workspace_default(workspacename, u=Util()):
 
     return stat == 200
 
-def delete_workspace(workspacename, u=Util()):
+def delete_workspace(workspacename, u):
     """Delete the workspace from the geoserver.
 
     Does not checkt if the workspace exists.
@@ -128,7 +128,7 @@ def delete_workspace(workspacename, u=Util()):
 
     return stat == 200
 
-def delete_all_workspaces(u=Util()):
+def delete_all_workspaces(u):
     """Delete all the workspaces from the geosever.
     """
     logging.info('Deleting ALL workspaces.')
@@ -137,6 +137,7 @@ def delete_all_workspaces(u=Util()):
         delete_workspace(ws, u)
 
 def main():
+    print 'calling workspace.main'
     config = Util()
     workspaces = get_workspaces(config)
     print 'Does workspace "blabla" exist?'
