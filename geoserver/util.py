@@ -18,6 +18,8 @@ class Util:
         config_file -- the config file to use
         """
         self.config = ConfigParser.RawConfigParser()
+        if not(config_file):
+            config_file = 'settings.cfg'
         try:
             self.config.readfp(open(config_file))
         except IOError:
@@ -48,14 +50,19 @@ class Util:
         self._url = self.config.get('server','url')
         self._port = self.config.get('server', 'port')
         self._address = self.config.get('server', 'address')
-        self._user_and_pass = b64encode(self.config.get('server','user') + ':'+\
-                                        self.config.get('server','pass'))
+        self._auth = 'Basic {0}'.format(b64encode('{0}:{1}'.format(
+                            self.config.get('server','user'),
+                            self.config.get('server','pass'))))
 
         logging.basicConfig(filename=self.config.get('logging','filename'), \
                             level=self.config.get('logging','level'))
         logging.info('Initialised Util class with settings')
+        logging.info('Using server: {0} at port {1} on {2}'.format(
+                    self._address,
+                    self._port,
+                    self._url))
 
-    def request(self, method, path, payload, mime='text/xml'):
+    def request(self, method, path, payload='', mime='text/xml'):
         """Perform http-request and get the response
 
         Keyword-arguments:
@@ -67,20 +74,28 @@ class Util:
         Returns:
             HTTPresponse
         """
-        logging.debug('Sending request with method: {0}, to path: {1}'.format(
+        logging.debug('Sending request with method: {0} to path: {1}:{2}/{3}/{4}'.format(
                             method,
+                            self._url,
+                            self._port,
+                            self._address,
                             path))
-        headers = {'Authorization' : 'Basic {0}'.format(self._user_and_pass),
-                   'Content-type': mime}
+        headers = {}
+        headers['Authorization'] = self._auth
+        headers['Content-type'] = mime
+
         try:
             connection = httplib.HTTPConnection(
                     self._url,
                     self._port)
             connection.request(
                     method,
-                    self._address + '/' + path,
+                    '/' + self._address + '/' + path,
                     payload,
                     headers)
+            response = connection.getresponse()
+            resp = response.read()
+            logging.debug('Succeeded in getting response: {0}'.format(resp))
         except Exception as e:
             logging.error('Error with sending "{0}"-request to ' + \
                           '{1}:{2}/{3}/{4}. Get error: {5}'.format(method,
@@ -90,8 +105,9 @@ class Util:
                                                         path,
                                                         e))
             raise e
-        response = connection.getresponse()
-        return response
+        finally:
+            connection.close()
+        return resp
 
 def main():
     u = Util('settings.cfg')
