@@ -12,12 +12,11 @@ class Util:
 
         Read the configuraton file and setup logging. It uses some default
         values if no config file is present. Raises errors when things are
-        not going as expeted'
+        not going as expeted.
 
         Keyword arguments:
         config_file -- the config file to use
         """
-        #Create a config object and pass some defaults
         self.config = ConfigParser.RawConfigParser()
         try:
             self.config.readfp(open(config_file))
@@ -73,10 +72,10 @@ class Util:
                     self.config.get('server', 'url'),
                     self.config.get('server', 'port'))
             connection.request(
-                method,
-                self.config.get('server', 'address') + '/' + path,
-                payload,
-                headers)
+                    method,
+                    self.config.get('server', 'address') + '/' + path,
+                    payload,
+                    headers)
         except Exception as e:
             logging.error('Error with sending "{0}"-request to {1}:{2}/{3}/{4}. Get error: {5}'.format(method,
                                                         self.config.get('server','url'),
