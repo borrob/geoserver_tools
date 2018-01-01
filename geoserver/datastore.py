@@ -43,7 +43,7 @@ def datastore_exists(workspacename, datastorename, u):
 
     Returns True of False.
     """
-    if (not(workspace..workspace_exists(workspacename, u))):
+    if (not(workspace.workspace_exists(workspacename, u))):
             logging.error('Datastore cannot exist if workspace doesn\'t exist.')
             return False
     
