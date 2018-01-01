@@ -21,7 +21,8 @@ from util import Util
 def get_datastores(workspace, u):
     """Get an overview of all datastores of this workspace.
 
-    Uses the util class to get the specifices on the server etc.
+    Uses the util class to get the specifices on the server etc. Assumes the
+    workspace exists.
 
     Returns python dict with name of the datastores as key and a dict as
     value. This dict contains the href to the datastore.
@@ -31,11 +32,14 @@ def get_datastores(workspace, u):
                                   '/datastores.json',
                            payload = None,
                            mime = 'application/json')
-    ds = json.loads(ds_request).get('dataStores').get('dataStore')
+    json_data = json.loads(ds_request)
+    if json_data.get('dataStores') == '':
+        return None
+    datastores = json_data.get('dataStores').get('dataStore')
 
     out = {}
-    for d in ds:
-        out[d.get('name')] = {'href': d.get('href')}
+    for datastore in datastores:
+        out[datastore.get('name')] = {'href': datastore.get('href')}
     return out
 
 def datastore_exists(workspacename, datastorename, u):
