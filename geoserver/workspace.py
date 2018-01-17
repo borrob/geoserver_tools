@@ -136,6 +136,13 @@ def delete_all_workspaces(u):
     for ws in workspaces:
         delete_workspace(ws, u)
 
+def get_name_of_default_workspace(u):
+    stat, ws_request = u.request(method = 'GET',
+                           path = 'rest/workspaces/default.json',
+                           mime = 'application/json')
+    ws = json.loads(ws_request).get('workspace').get('name')
+    return ws
+    
 def main():
     print 'calling workspace.main'
     config = Util()
