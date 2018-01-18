@@ -20,10 +20,10 @@ from util import Util
 
 def get_featuretypes(workspace, datastore, u):
     """Get an overview of all featurestype of this datastore in the workspace.
-
+    
     Uses the util class to get the specifices on the server etc. Assumes the
     workspace exists.
-
+    
     Returns python dict with name of the datastores as key and a dict as
     value. This dict contains the href to the datastore.
     """
