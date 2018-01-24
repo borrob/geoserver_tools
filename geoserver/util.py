@@ -7,7 +7,7 @@ from base64 import b64encode
 class Util:
     """Util Class to help with all the annoying tasks."""
 
-    def __init__(self, config_file=None):
+    def __init__(self, config_file='settings.sfg'):
         """Initilise the util class
 
         Read the configuraton file and setup logging. It uses some default
@@ -18,34 +18,7 @@ class Util:
         config_file -- the config file to use
         """
         self.config = ConfigParser.RawConfigParser()
-        if not(config_file):
-            config_file = 'settings.cfg'
-        try:
-            self.config.readfp(open(config_file))
-        except IOError:
-            print ('Could not read specified configfile -> using defaults')
-            self.config.add_section('server')
-            self.config.set('server', 'url', 'localhost')
-            self.config.set('server', 'port', '8080')
-            self.config.set('server', 'address', 'geoserver')
-            self.config.set('server', 'user', 'admin')
-            self.config.set('server','pass', 'geoserver')
-            self.config.add_section('logging')
-            self.config.set('logging', 'filename', 'geoserver-python.log')
-            self.config.set('logging', 'level', logging.INFO)
-        else:
-            if (not(self.config.has_section('server')
-                    and self.config.has_option('server', 'url')
-                    and self.config.has_option('server','port')
-                    and self.config.has_option('server','address'))):
-                print 'Config file is not complete! I need url, ' + \
-                      'port and address in the server section!'
-                raise ValueError('Config file is not complete.')
-            if (not(self.config.has_section('logging')
-                    and self.config.has_option('logging', 'filename')
-                    and self.config.has_option('logging', 'level'))):
-                print 'Config file not complete! I need a setup for logging!'
-                raise ValueError('Config file is not complete.')
+        self.check_config(config_file)
 
         self._url = self.config.get('server','url')
         self._port = self.config.get('server', 'port')
@@ -61,6 +34,41 @@ class Util:
                     self._address,
                     self._port,
                     self._url))
+
+    def check_config(self, config_file):
+    """Perform basic checks on the config file and set default if the key values
+    are not present.
+    """
+        try:
+            self.config.readfp(open(config_file))
+        except IOError:
+            print ('Could not read specified configfile -> using defaults')
+            self.config.add_section('server')
+            self.config.set('server', 'url', 'localhost')
+            self.config.set('server', 'port', '8080')
+            self.config.set('server', 'address', 'geoserver')
+            self.config.set('server', 'user', 'admin')
+            self.config.set('server','pass', 'geoserver')
+            self.config.add_section('logging')
+            self.config.set('logging', 'filename', 'geoserver-python.log')
+            self.config.set('logging', 'level', logging.INFO)
+        if (not(self.config.has_section('server')
+                and self.config.has_option('server', 'url')
+                and self.config.has_option('server','port')
+                and self.config.has_option('server','address')
+               )
+           ):
+            print 'Config file is not complete! I need url, ' + \
+                  'port and address in the server section!'
+            raise ValueError('Config file is not complete.')
+        if (not(self.config.has_section('logging')
+                and self.config.has_option('logging', 'filename')
+                and self.config.has_option('logging', 'level')
+               )
+           ):
+            print 'Config file not complete! I need a setup for logging!'
+            raise ValueError('Config file is not complete.')
+
 
     def request(self, method, path, payload='', mime='text/xml'):
         """Perform http-request and get the response
@@ -111,8 +119,8 @@ class Util:
 
 def main():
     u = Util('settings.cfg')
-    r = u.request('get', 'test', None)
-    print r.status
+    stat, response = u.request('get', 'test', None)
+    print stat
 
 if __name__ == '__main__':
     main()
